@@ -229,7 +229,7 @@ function duplicate_post_show_update_notice() {
 
 	echo '<div id="duplicate-post-notice" class="notice is-dismissible" style="display: flex; align-items: flex-start;">
 			<img src="' . esc_url( $img_path ) . '" alt="" style="margin: 1em 1em 1em 0; width: 130px; align-self: center;"/>
-			<div stle="margin: 0.5em">
+			<div style="margin: 0.5em">
 				<h1 style="font-size: 14px; color: #a4286a; font-weight: 600; margin-top: 8px;">' . $title . '</h1>' // phpcs:ignore WordPress.Security.EscapeOutput -- Reason: escaped properly above.
 				. Newsletter::newsletter_signup_form() // phpcs:ignore WordPress.Security.EscapeOutput -- Reason: escaped in newsletter.php.
 			. '</div>
@@ -275,7 +275,7 @@ function duplicate_post_copy_post_taxonomies( $new_id, $post ) {
 	global $wpdb;
 	if ( isset( $wpdb->terms ) ) {
 		// Clear default category (added by wp_insert_post).
-		wp_set_object_terms( $new_id, null, 'category' );
+		wp_set_object_terms( $new_id, [], 'category' );
 
 		$post_taxonomies = get_object_taxonomies( $post->post_type );
 		// Several plugins just add support to post-formats but don't register post_format taxonomy.
@@ -343,8 +343,6 @@ function duplicate_post_copy_post_meta_info( $new_id, $post ) {
 	if ( intval( get_option( 'duplicate_post_copythumbnail' ) ) === 0 ) {
 		$meta_blacklist[] = '_thumbnail_id';
 	}
-
-	$meta_blacklist = apply_filters_deprecated( 'duplicate_post_blacklist_filter', [ $meta_blacklist ], '3.2.5', 'duplicate_post_excludelist_filter' );
 
 	/**
 	 * Filters the meta fields excludelist when copying a post.

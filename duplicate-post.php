@@ -11,8 +11,10 @@
  * Description: The go-to tool for cloning posts and pages, including the powerful Rewrite & Republish feature.
  * Version:     4.5
  * Author:      Enrico Battocchi & Team Yoast
- * Author URI:  https://yoast.com
+ * Author URI:  https://yoa.st/team-yoast-duplicate
  * Text Domain: duplicate-post
+ * Requires at least: 6.1
+ * Requires PHP: 7.2.5
  *
  * Copyright 2020-2022 Yoast BV (email : info@yoast.com)
  *
