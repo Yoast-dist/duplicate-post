@@ -49,7 +49,7 @@ class Column {
 					\add_filter( "manage_{$enabled_post_type}_posts_columns", [ $this, 'add_original_column' ] );
 					\add_action( "manage_{$enabled_post_type}_posts_custom_column", [ $this, 'show_original_item' ], 10, 2 );
 				}
-				\add_action( 'quick_edit_custom_box', [ $this, 'quick_edit_remove_original' ], 10, 2 );
+				\add_action( 'quick_edit_custom_box', [ $this, 'quick_edit_remove_original' ] );
 				\add_action( 'admin_enqueue_scripts', [ $this, 'admin_enqueue_scripts' ] );
 				\add_action( 'admin_enqueue_scripts', [ $this, 'admin_enqueue_styles' ] );
 			}
@@ -94,7 +94,7 @@ class Column {
 
 				$column_content = Utils::get_edit_or_view_link( $original_item );
 			}
-			echo \sprintf(
+			\printf(
 				'<span class="duplicate_post_original_link"%s>%s</span>',
 				$data_attr, // phpcs:ignore WordPress.Security.EscapeOutput
 				$column_content // phpcs:ignore WordPress.Security.EscapeOutput
