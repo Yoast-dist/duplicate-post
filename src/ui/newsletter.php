@@ -16,7 +16,6 @@ class Newsletter {
 
 		$newsletter_form_response = self::newsletter_handle_form();
 
-
 		$copy = \sprintf(
 		/* translators: 1: Yoast */
 			\esc_html__(
@@ -49,7 +48,7 @@ class Newsletter {
 		$html = '
 		<!-- Begin Newsletter Signup Form -->
 		<form method="post" id="newsletter-subscribe-form" name="newsletter-subscribe-form" novalidate>
-		' . \wp_nonce_field( 'newsletter', 'newsletter_nonce' ) . '
+		' . \wp_nonce_field( 'newsletter', 'newsletter_nonce', true, false ) . '
 		<p>' . $copy . '</p>
 		<div class="newsletter-field-group" style="display: flex; flex-direction: column">
 			<label for="newsletter-email" style="margin: 0 0 4px 0;"><strong>' . $email_label . '</strong></label>
@@ -70,7 +69,7 @@ class Newsletter {
 	/**
 	 * Handles and validates Newsletter form.
 	 *
-	 * @return array|null
+	 * @return array<string, string>|null
 	 */
 	private static function newsletter_handle_form() {
 
@@ -106,7 +105,7 @@ class Newsletter {
 	 *
 	 * @param string $email Subscriber email.
 	 *
-	 * @return array Feedback response.
+	 * @return array<string, string> Feedback response.
 	 */
 	private static function newsletter_subscribe_to_mailblue( $email ) {
 		$response = \wp_remote_post(

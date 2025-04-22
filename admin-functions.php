@@ -11,6 +11,7 @@ if ( ! is_admin() ) {
 }
 
 use Yoast\WP\Duplicate_Post\UI\Newsletter;
+use Yoast\WP\Duplicate_Post\Utils;
 
 require_once DUPLICATE_POST_PATH . 'options.php';
 
@@ -19,6 +20,8 @@ require_once DUPLICATE_POST_PATH . 'compat/jetpack-functions.php';
 
 /**
  * Wrapper for the option 'duplicate_post_version'.
+ *
+ * @return mixed
  */
 function duplicate_post_get_installed_version() {
 	return get_option( 'duplicate_post_version' );
@@ -26,6 +29,8 @@ function duplicate_post_get_installed_version() {
 
 /**
  * Wrapper for the defined constant DUPLICATE_POST_CURRENT_VERSION.
+ *
+ * @return string
  */
 function duplicate_post_get_current_version() {
 	return DUPLICATE_POST_CURRENT_VERSION;
@@ -35,6 +40,8 @@ add_action( 'admin_init', 'duplicate_post_admin_init' );
 
 /**
  * Adds handlers depending on the options.
+ *
+ * @return void
  */
 function duplicate_post_admin_init() {
 	duplicate_post_plugin_upgrade();
@@ -75,6 +82,8 @@ function duplicate_post_admin_init() {
 
 /**
  * Plugin upgrade.
+ *
+ * @return void
  */
 function duplicate_post_plugin_upgrade() {
 	$installed_version = duplicate_post_get_installed_version();
@@ -142,9 +151,12 @@ function duplicate_post_plugin_upgrade() {
 	);
 	add_option( 'duplicate_post_show_link_in', $show_links_in_defaults );
 
-	$taxonomies_blacklist = get_option( 'duplicate_post_taxonomies_blacklist' );
-	if ( $taxonomies_blacklist === '' ) {
+	$taxonomies_blacklist = get_option( 'duplicate_post_taxonomies_blacklist', [] );
+	if ( empty( $taxonomies_blacklist ) ) {
 		$taxonomies_blacklist = [];
+	}
+	elseif ( ! is_array( $taxonomies_blacklist ) ) {
+		$taxonomies_blacklist = [ $taxonomies_blacklist ];
 	}
 	if ( in_array( 'post_format', $taxonomies_blacklist, true ) ) {
 		update_option( 'duplicate_post_copyformat', 0 );
@@ -153,9 +165,6 @@ function duplicate_post_plugin_upgrade() {
 	}
 
 	$meta_blacklist = explode( ',', get_option( 'duplicate_post_blacklist' ) );
-	if ( $meta_blacklist === '' ) {
-		$meta_blacklist = [];
-	}
 	$meta_blacklist = array_map( 'trim', $meta_blacklist );
 	if ( in_array( '_wp_page_template', $meta_blacklist, true ) ) {
 		update_option( 'duplicate_post_copytemplate', 0 );
@@ -205,6 +214,8 @@ function duplicate_post_migrate_show_links_in_options( $defaults ) {
  * Shows the welcome notice.
  *
  * @global string $wp_version The WordPress version string.
+ *
+ * @return void
  */
 function duplicate_post_show_update_notice() {
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -229,7 +240,7 @@ function duplicate_post_show_update_notice() {
 
 	echo '<div id="duplicate-post-notice" class="notice is-dismissible" style="display: flex; align-items: flex-start;">
 			<img src="' . esc_url( $img_path ) . '" alt="" style="margin: 1em 1em 1em 0; width: 130px; align-self: center;"/>
-			<div stle="margin: 0.5em">
+			<div style="margin: 0.5em">
 				<h1 style="font-size: 14px; color: #a4286a; font-weight: 600; margin-top: 8px;">' . $title . '</h1>' // phpcs:ignore WordPress.Security.EscapeOutput -- Reason: escaped properly above.
 				. Newsletter::newsletter_signup_form() // phpcs:ignore WordPress.Security.EscapeOutput -- Reason: escaped in newsletter.php.
 			. '</div>
@@ -270,12 +281,14 @@ function duplicate_post_dismiss_notice() {
  *
  * @param int     $new_id New post ID.
  * @param WP_Post $post   The original post object.
+ *
+ * @return void
  */
 function duplicate_post_copy_post_taxonomies( $new_id, $post ) {
 	global $wpdb;
 	if ( isset( $wpdb->terms ) ) {
 		// Clear default category (added by wp_insert_post).
-		wp_set_object_terms( $new_id, null, 'category' );
+		wp_set_object_terms( $new_id, [], 'category' );
 
 		$post_taxonomies = get_object_taxonomies( $post->post_type );
 		// Several plugins just add support to post-formats but don't register post_format taxonomy.
@@ -283,9 +296,12 @@ function duplicate_post_copy_post_taxonomies( $new_id, $post ) {
 			$post_taxonomies[] = 'post_format';
 		}
 
-		$taxonomies_blacklist = get_option( 'duplicate_post_taxonomies_blacklist' );
-		if ( $taxonomies_blacklist === '' ) {
+		$taxonomies_blacklist = get_option( 'duplicate_post_taxonomies_blacklist', [] );
+		if ( empty( $taxonomies_blacklist ) ) {
 			$taxonomies_blacklist = [];
+		}
+		elseif ( ! is_array( $taxonomies_blacklist ) ) {
+			$taxonomies_blacklist = [ $taxonomies_blacklist ];
 		}
 		if ( intval( get_option( 'duplicate_post_copyformat' ) ) === 0 ) {
 			$taxonomies_blacklist[] = 'post_format';
@@ -318,6 +334,8 @@ function duplicate_post_copy_post_taxonomies( $new_id, $post ) {
  *
  * @param int     $new_id The new post ID.
  * @param WP_Post $post   The original post object.
+ *
+ * @return void
  */
 function duplicate_post_copy_post_meta_info( $new_id, $post ) {
 	$post_meta_keys = get_post_custom_keys( $post->ID );
@@ -344,8 +362,6 @@ function duplicate_post_copy_post_meta_info( $new_id, $post ) {
 		$meta_blacklist[] = '_thumbnail_id';
 	}
 
-	$meta_blacklist = apply_filters_deprecated( 'duplicate_post_blacklist_filter', [ $meta_blacklist ], '3.2.5', 'duplicate_post_excludelist_filter' );
-
 	/**
 	 * Filters the meta fields excludelist when copying a post.
 	 *
@@ -361,7 +377,7 @@ function duplicate_post_copy_post_meta_info( $new_id, $post ) {
 
 		$meta_keys = [];
 		foreach ( $post_meta_keys as $meta_key ) {
-			if ( ! preg_match( '#^' . $meta_blacklist_string . '$#', $meta_key ) ) {
+			if ( ! preg_match( '#^(' . $meta_blacklist_string . ')$#', $meta_key ) ) {
 				$meta_keys[] = $meta_key;
 			}
 		}
@@ -411,7 +427,7 @@ function duplicate_post_addslashes_deep( $value ) {
  * @return string|mixed
  */
 function duplicate_post_addslashes_to_strings_only( $value ) {
-	return Yoast\WP\Duplicate_Post\Utils::addslashes_to_strings_only( $value );
+	return Utils::addslashes_to_strings_only( $value );
 }
 
 /**
@@ -429,6 +445,8 @@ function duplicate_post_wp_slash( $value ) {
  *
  * @param int     $new_id The new post ID.
  * @param WP_Post $post   The original post object.
+ *
+ * @return void
  */
 function duplicate_post_copy_attachments( $new_id, $post ) {
 	// Get thumbnail ID.
@@ -463,14 +481,15 @@ function duplicate_post_copy_attachments( $new_id, $post ) {
 		$new_attachment_id = media_handle_sideload( $file_array, $new_id, $desc );
 
 		if ( is_wp_error( $new_attachment_id ) ) {
-			unlink( $file_array['tmp_name'] );
+			wp_delete_file( $file_array['tmp_name'] );
 			continue;
 		}
 		$new_post_author = wp_get_current_user();
 		$cloned_child    = [
 			'ID'           => $new_attachment_id,
 			'post_title'   => $child->post_title,
-			'post_exceprt' => $child->post_title,
+			'post_excerpt' => $child->post_excerpt, // Caption.
+			'post_content' => $child->post_content, // Description.
 			'post_author'  => $new_post_author->ID,
 		];
 		wp_update_post( wp_slash( $cloned_child ) );
@@ -493,6 +512,8 @@ function duplicate_post_copy_attachments( $new_id, $post ) {
  * @param int     $new_id The new post ID.
  * @param WP_Post $post   The original post object.
  * @param string  $status Optional. The destination status.
+ *
+ * @return void
  */
 function duplicate_post_copy_children( $new_id, $post, $status = '' ) {
 	// Get children.
@@ -518,6 +539,8 @@ function duplicate_post_copy_children( $new_id, $post, $status = '' ) {
  *
  * @param int     $new_id The new post ID.
  * @param WP_Post $post   The original post object.
+ *
+ * @return void
  */
 function duplicate_post_copy_comments( $new_id, $post ) {
 	$comments = get_comments(
@@ -741,13 +764,13 @@ function duplicate_post_create_duplicate( $post, $status = '', $parent_id = '' )
 /**
  * Adds some links on the plugin page.
  *
- * @param array  $links The links array.
- * @param string $file  The file name.
- * @return array
+ * @param array<string> $links The links array.
+ * @param string        $file  The file name.
+ * @return array<string>
  */
 function duplicate_post_add_plugin_links( $links, $file ) {
 	if ( plugin_basename( __DIR__ . '/duplicate-post.php' ) === $file ) {
-		$links[] = '<a href="https://yoast.com/wordpress/plugins/duplicate-post">' . esc_html__( 'Documentation', 'duplicate-post' ) . '</a>';
+		$links[] = '<a href="https://yoa.st/4jr">' . esc_html__( 'Documentation', 'duplicate-post' ) . '</a>';
 	}
 	return $links;
 }
