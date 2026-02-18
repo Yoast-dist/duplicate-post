@@ -41,13 +41,15 @@ class Asset_Manager {
 			'duplicate_post_edit_script',
 			\plugins_url( \sprintf( 'js/dist/duplicate-post-edit-%s.js', $flattened_version ), \DUPLICATE_POST_FILE ),
 			[
+				'wp-api-fetch',
 				'wp-components',
 				'wp-element',
 				'wp-i18n',
 			],
 			\DUPLICATE_POST_CURRENT_VERSION,
-			true
+			true,
 		);
+		\wp_set_script_translations( 'duplicate_post_edit_script', 'duplicate-post' );
 
 		\wp_register_script(
 			'duplicate_post_strings',
@@ -58,15 +60,16 @@ class Asset_Manager {
 				'wp-i18n',
 			],
 			\DUPLICATE_POST_CURRENT_VERSION,
-			true
+			true,
 		);
+		\wp_set_script_translations( 'duplicate_post_strings', 'duplicate-post' );
 
 		\wp_register_script(
 			'duplicate_post_quick_edit_script',
 			\plugins_url( \sprintf( 'js/dist/duplicate-post-quick-edit-%s.js', $flattened_version ), \DUPLICATE_POST_FILE ),
 			[ 'jquery' ],
 			\DUPLICATE_POST_CURRENT_VERSION,
-			true
+			true,
 		);
 
 		\wp_register_script(
@@ -74,7 +77,7 @@ class Asset_Manager {
 			\plugins_url( \sprintf( 'js/dist/duplicate-post-options-%s.js', $flattened_version ), \DUPLICATE_POST_FILE ),
 			[ 'jquery' ],
 			\DUPLICATE_POST_CURRENT_VERSION,
-			true
+			true,
 		);
 	}
 
@@ -109,12 +112,12 @@ class Asset_Manager {
 		\wp_add_inline_script(
 			$handle,
 			'let duplicatePostNotices = {};',
-			'before'
+			'before',
 		);
 		\wp_localize_script(
 			$handle,
 			'duplicatePost',
-			$data_object
+			$data_object,
 		);
 	}
 
@@ -131,7 +134,7 @@ class Asset_Manager {
 		\wp_localize_script(
 			$handle,
 			'duplicatePostStrings',
-			$data_object
+			$data_object,
 		);
 	}
 
@@ -169,13 +172,13 @@ class Asset_Manager {
 			\plugins_url( \sprintf( 'js/dist/duplicate-post-elementor-%s.js', $flattened_version ), \DUPLICATE_POST_FILE ),
 			[ 'jquery' ],
 			\DUPLICATE_POST_CURRENT_VERSION,
-			true
+			true,
 		);
 		\wp_enqueue_script( $handle );
 		\wp_localize_script(
 			$handle,
 			'duplicatePost',
-			$data_object
+			$data_object,
 		);
 	}
 }
