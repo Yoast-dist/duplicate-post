@@ -53,12 +53,12 @@ class Classic_Editor {
 	public function register_hooks() {
 		\add_action( 'post_submitbox_misc_actions', [ $this, 'add_check_changes_link' ], 90 );
 
-		if ( \intval( Utils::get_option( 'duplicate_post_show_link_in', 'submitbox' ) ) === 1 ) {
-			if ( \intval( Utils::get_option( 'duplicate_post_show_link', 'new_draft' ) ) === 1 ) {
+		if ( (int) Utils::get_option( 'duplicate_post_show_link_in', 'submitbox' ) === 1 ) {
+			if ( (int) Utils::get_option( 'duplicate_post_show_link', 'new_draft' ) === 1 ) {
 				\add_action( 'post_submitbox_start', [ $this, 'add_new_draft_post_button' ] );
 			}
 
-			if ( \intval( Utils::get_option( 'duplicate_post_show_link', 'rewrite_republish' ) ) === 1 ) {
+			if ( (int) Utils::get_option( 'duplicate_post_show_link', 'rewrite_republish' ) === 1 ) {
 				\add_action( 'post_submitbox_start', [ $this, 'add_rewrite_and_republish_post_button' ] );
 			}
 		}
@@ -67,9 +67,10 @@ class Classic_Editor {
 		\add_filter( 'post_updated_messages', [ $this, 'change_scheduled_notice_classic_editor' ] );
 
 		\add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_classic_editor_scripts' ] );
-		if ( \intval( Utils::get_option( 'duplicate_post_show_link_in', 'submitbox' ) ) === 1 ) {
-			if ( \intval( Utils::get_option( 'duplicate_post_show_link', 'new_draft' ) ) === 1
-				|| \intval( Utils::get_option( 'duplicate_post_show_link', 'rewrite_republish' ) ) === 1 ) {
+		if ( (int) Utils::get_option( 'duplicate_post_show_link_in', 'submitbox' ) === 1 ) {
+			if ( (int) Utils::get_option( 'duplicate_post_show_link', 'new_draft' ) === 1
+				|| (int) Utils::get_option( 'duplicate_post_show_link', 'rewrite_republish' ) === 1
+			) {
 				\add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_classic_editor_styles' ] );
 			}
 		}
@@ -99,7 +100,7 @@ class Classic_Editor {
 			$id   = \intval( \wp_unslash( $_GET['post'] ) );
 			$post = \get_post( $id );
 
-			if ( ! \is_null( $post ) && $this->permissions_helper->is_rewrite_and_republish_copy( $post ) ) {
+			if ( $post !== null && $this->permissions_helper->is_rewrite_and_republish_copy( $post ) ) {
 				$this->asset_manager->enqueue_strings_script();
 			}
 		}
@@ -116,7 +117,7 @@ class Classic_Editor {
 			$id   = \intval( \wp_unslash( $_GET['post'] ) );
 			$post = \get_post( $id );
 
-			if ( ! \is_null( $post ) && $this->permissions_helper->should_links_be_displayed( $post ) ) {
+			if ( $post !== null && $this->permissions_helper->should_links_be_displayed( $post ) ) {
 				$this->asset_manager->enqueue_styles();
 			}
 		}
@@ -130,7 +131,7 @@ class Classic_Editor {
 	 * @return void
 	 */
 	public function add_new_draft_post_button( $post = null ) {
-		if ( \is_null( $post ) ) {
+		if ( $post === null ) {
 			if ( isset( $_GET['post'] ) ) {
 				$id   = \intval( \wp_unslash( $_GET['post'] ) );
 				$post = \get_post( $id );
@@ -156,7 +157,7 @@ class Classic_Editor {
 	 * @return void
 	 */
 	public function add_rewrite_and_republish_post_button( $post = null ) {
-		if ( \is_null( $post ) ) {
+		if ( $post === null ) {
 			if ( isset( $_GET['post'] ) ) {
 				$id   = \intval( \wp_unslash( $_GET['post'] ) );
 				$post = \get_post( $id );
@@ -185,7 +186,7 @@ class Classic_Editor {
 	 * @return void
 	 */
 	public function add_check_changes_link( $post = null ) {
-		if ( \is_null( $post ) ) {
+		if ( $post === null ) {
 			if ( isset( $_GET['post'] ) ) {
 				$id   = \intval( \wp_unslash( $_GET['post'] ) );
 				$post = \get_post( $id );

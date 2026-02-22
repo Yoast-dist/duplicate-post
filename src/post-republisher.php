@@ -260,7 +260,7 @@ class Post_Republisher {
 
 			\check_admin_referer( 'dp-republish', 'dpnonce' );
 
-			if ( \intval( \get_post_meta( $copy_id, '_dp_has_been_republished', true ) ) === 1 ) {
+			if ( (int) \get_post_meta( $copy_id, '_dp_has_been_republished', true ) === 1 ) {
 				$this->delete_copy( $copy_id, $post_id );
 			}
 			else {
@@ -368,7 +368,7 @@ class Post_Republisher {
 		// Delete the copy bypassing the trash so it also deletes the copy post meta.
 		\wp_delete_post( $copy_id, $permanently_delete );
 
-		if ( ! \is_null( $post_id ) ) {
+		if ( $post_id !== null ) {
 			// Delete the meta that marks the original post has having a copy.
 			\delete_post_meta( $post_id, '_dp_has_rewrite_republish_copy' );
 		}
