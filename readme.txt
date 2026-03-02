@@ -4,7 +4,7 @@ Donate link: 		https://yoast.com/wordpress/plugins/duplicate-post/
 Tags: 				duplicate post, copy, clone
 Requires at least: 	6.8
 Tested up to: 		6.9
-Stable tag: 		4.6-RC1
+Stable tag: 		4.6-RC2
 Requires PHP:		7.4
 License: 			GPLv2 or later
 License URI: 		http://www.gnu.org/licenses/gpl-2.0.html
@@ -87,6 +87,7 @@ Release date: 2026-03-03
 * Fixes a bug where cloning an attachment did not copy its description as expected.
 * Fixes a bug where notices would not be appearing in the block editor, throwing console errors, with some locales.
 * Fixes a bug where Rewrite & Republish copies could remain orphaned, blocking editors from creating a new Rewrite & Republish copy for the original post.
+* Fixes a bug where the block editor button were not styled if the admin bar links where not present/
 * Fixes a bug where translations where missing in the buttons and the notices in the Block Editor. Props to @petitphp.
 * Minor security improvement
 
